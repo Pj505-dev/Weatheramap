@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>City Finder</title>
+    <style>
+        body { font-family: Arial; text-align: center; margin-top: 50px; }
+        input, button { padding: 10px; font-size: 16px; }
+        #result { margin-top: 20px; font-size: 18px; color: green; }
+        #error { margin-top: 10px; color: red; }
+    </style>
+</head>
+<body>
+    <h1>Find Cities by First Letter</h1>
+    <p>Enter a letter to find city names:</p>
+    <input type="text" id="letterInput" maxlength="1" />
+    <button onclick="fetchCities()">Search</button>
+
+    <div id="result"></div>
+    <div id="error"></div>
+
+    <script>
+        function fetchCities() {
+            const letter = document.getElementById("letterInput").value.trim();
+            document.getElementById("result").innerHTML = "";
+            document.getElementById("error").innerHTML = "";
+
+            fetch("/cities", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ letter })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.cities) {
+                    if (data.cities.length > 0) {
+                        document.getElementById("result").innerHTML =
+                            `<strong>Cities starting with '${letter}':</strong><br>${data.cities.join(', ')}<br><strong>Count:</strong> ${data.count}`;
+                    } else {
+                        document.getElementById("result").innerHTML = `No cities found for '${letter}'`;
+                    }
+                } else {
+                    document.getElementById("error").innerText = data.error || "Unknown error.";
+                }
+            })
+            .catch(() => {
+                document.getElementById("error").innerText = "Server error.";
+            });
+        }
+    </script>
+</body>
+</html>
